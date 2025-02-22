@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="SevenFour" content="KohZhiHong">
+    <meta name="PersonalProject01" content="ASCII Art Converter - Created by SEVEN.FOUR">
+    <meta name="copyright" content="&copy; 2025 Koh Zhi Hong. All Rights Reserved.">
+    <title>ASCII Art Converter</title>
+    <style>
+        /* General Styles */
+        body {
+                font-family: "Courier New", monospace;
+            margin: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.light-theme {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        body.dark-theme {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+/* Rounded Corners for Specific Buttons */
+#apply-custom-chars,
+#randomize-seed,
+#save-text,
+#save-image,
+#save-video {
+    border-radius: 25px; /* More rounded corners */
+    padding: 12px 24px; /* Adjust padding for better appearance */
+}
+
+#reset-button {
+    background-color: #f44336; /* Red background */
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+#reset-button:hover {
+    background-color: #d32f2f; /* Darker red on hover */
+    transform: scale(1.05);
+}
+
+/* Hover effect for the dropdown */
+#algorithm-type:hover {
+    border-color: #4CAF50; /* Highlight border on hover */
+}
+
+.copy-buttons-container {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px dashed #ccc; /* Add a border to visually separate the section */
+    border-radius: 10px;
+}
+
+.copy-button {
+    background-color: #FF9800; /* Orange background */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.copy-button:hover {
+    background-color: #E65100; /* Darker orange on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+#copy-message {
+    display: none; /* Hidden by default */
+    color: green;
+    font-weight: bold;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #e6ffe6; /* Light green background */
+    text-align: center;
+}
+        /* Loading Spinner */
+#loading-spinner {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed positioning to overlay the page */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the spinner */
+    z-index: 1000; /* Ensure it appears above other elements */
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3); /* Light border */
+    border-left-color: #4CAF50; /* Highlighted side */
+    border-radius: 50%; /* Circular shape */
+    animation: spin 1s linear infinite; /* Rotating animation */
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+      #ascii-art {
+    font-family: "Courier New", monospace;
+    white-space: pre-wrap;
+    line-height: 1;
+    letter-spacing: 0;
+    padding: 20px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background-color: #f4f4f4;
+    color: #000000;
+    max-width: 100%;
+    word-wrap: break-word;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    display: flex; /* Use flexbox */
+    flex-direction: row; /* Arrange children horizontally */
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.controls-container {
+    flex: 1; /* Take up 1/3 of the width */
+    min-width: 300px; /* Ensure a minimum width for usability */
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+
+}
+
+.output-container {
+    flex: 2; /* Take up 2/3 of the width */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    overflow-y: auto; /* Enable scrolling if content overflows */
+}
+/* Dark Theme */
+body.dark-theme {
+    background-color: #121212; /* Dark background for the entire page */
+    color: #ffffff; /* Light text for better contrast */
+}
+
+body.dark-theme .controls-container {
+    background-color: #1e1e1e; /* Dark background for controls */
+    color: #ffffff; /* Light text for controls */
+    box-shadow: 2px 0 5px rgba(255, 255, 255, 0.1); /* Subtle shadow for contrast */
+}
+
+body.dark-theme .output-container {
+    background-color: #2d2d2d; /* Dark background for output */
+    color: #ffffff; /* Light text for output */
+}
+
+body.dark-theme #ascii-art {
+    background-color: #2d2d2d; /* Dark background for ASCII art */
+    color: #ffffff; /* Light text for ASCII art */
+    border-color: #444; /* Adjust border color for better visibility */
+}
+       button {
+       display: flex;
+    align-items: center; /* Align icon and text vertically */
+    gap: 8px; /* Add spacing between icon and text */
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+        body.light-theme #ascii-art {
+            background-color: #f4f4f4;
+            color: #000000;
+        }
+        body.dark-theme #ascii-art {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        video, img {
+            display: none; /* Hide media elements */
+        }
+        input[type="file"], button, select, input[type="range"] {
+            margin-bottom: 20px;
+            display: block;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        #save-video {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #save-video.recording {
+            background-color: #f44336;
+        }
+        .theme-toggle {
+            margin-top: 20px;
+        }
+
+        .controls {
+    display: flex;
+    flex-direction: column; /* Arrange items vertically */
+    gap: 10px; /* Add spacing between items */
+}
+
+.controls button,
+.controls input[type="range"],
+.controls label {
+    width: 100%; /* Ensure full width for consistency */
+}
+
+.controls input[type="file"] {
+    width: 100%; /* Ensure file input spans the full width */
+}
+
+.controls .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Footer Styling */
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+
+        footer a {
+            color: #9727c2;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column; /* Stack controls and output vertically */
+    }
+
+    .controls-container,
+    .output-container {
+        width: 100%; /* Full width on small screens */
+    }
+
+    button,
+    input[type="range"],
+    select {
+        width: 100%; /* Make buttons and inputs full-width */
+        margin-bottom: 10px; /* Add spacing between elements */
+    }
+
+    h2 {
+        font-size: 1.2rem; /* Reduce heading size */
+    }
+
+    #ascii-art {
+        font-size: 0.8rem; /* Reduce font size for ASCII art */
+    }
+}
+    </style>
+</head>
+<body class="light-theme">
+
+    <div class="container">
+    <!-- Left Side: Controls -->
+    <div class="controls-container">
+        <h2>ASCII Art Converter</h2>
+        <p>By Seven.Four</p>
+        <div class="controls">
+            <button id="start-webcam">Start Webcam</button>
+            <input type="file" id="media-input" accept="image/*, video/*"><br>
+
+            <label for="resolution-slider">Resolution:</label>
+            <input type="range" id="resolution-slider" min="10" max="200" value="100">
+            <span id="resolution-value">100x100 px</span>
+
+            <label for="tone-slider">Tone Adjustment (Lighter ↔ Heavier):</label>
+            <input type="range" id="tone-slider" min="-100" max="100" value="0">
+
+            <label for="blur-slider">Blur:</label>
+            <input type="range" id="blur-slider" min="0" max="10" value="0">
+
+            <label for="contrast-slider">Contrast:</label>
+            <input type="range" id="contrast-slider" min="-100" max="100" value="0">
+
+            <label><input type="checkbox" id="remove-white"> Remove White/Transparent</label>
+
+            <label><input type="checkbox" id="invert-colors"> Invert Colors</label>
+
+            <label><input type="checkbox" id="colorize"> Colorized ASCII Art</label><br>
+
+            <label for="custom-chars">Custom Characters:</label>
+            <input type="text" id="custom-chars" value="@%#*+=-:. ">
+            <button id="apply-custom-chars">Apply</button>
+
+            <button id="randomize-seed">Randomize Seed</button>
+
+            <button id="save-text">📋 Save as Text</button>
+            <button id="save-image">🖼️ Save as Image</button>
+            <button id="save-video">▶️ Save as Video</button>
+
+            <!-- Character Set Buttons -->
+                <div class="copy-buttons-container">
+    <h3>Copy Character Sets</h3>
+    <button class="char-set-button copy-button" data-char-set="@%#*+=-:. ">Standard</button>
+    <button class="char-set-button copy-button" data-char-set="█▓▒░">Block</button>
+    <button class="char-set-button copy-button" data-char-set="꓄ꌩꉣꍟ ꌗꂦꂵꍟ꓄ꃅꀤꈤꁅ ꓄ꂦ ꌗ꓄ꍏꋪ꓄">Glitch</button>
+                    <button class="char-set-button copy-button" data-char-set=" ← ↑ → ↓">Arrow</button>
+                </div>
+            <!-- Copy Message -->
+        <div id="copy-message" style="display: none; color: green; font-weight: bold; margin-top: 10px;"></div>
+            </div>
+
+        <!-- Reset Button -->
+        <!--<button id="reset-button">Reset (NOT WORKING)</button>-->
+
+
+            <div class="theme-toggle">
+                <label><input type="checkbox" id="theme-toggle"> Dark Theme</label>
+            </div>
+
+
+        </div>
+
+    <!-- Right Side: Output -->
+    <!-- Loading Spinner -->
+<div id="loading-spinner">
+    <div class="spinner"></div>
+</div>
+    <div class="output-container">
+        <h2>ASCII Art Output</h2>
+        <div id="ascii-art"></div>
+    </div>
+</div>
+
+    <!-- ASCII Art Output -->
+    <div id="ascii-art" style="font-family: 'Courier New', monospace; white-space: pre-wrap; line-height: 1; letter-spacing: 0; padding: 10px; background-color: #f4f4f4; color: #000000;"></div>
+    <div id="error-message" class="error"></div>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            Created by Seven.Four &middot;
+            <a href="https://linktr.ee/seven.four" target="_blank">Visual Diary</a> &middot;
+            &copy; 2025 All Rights Reserved
+        </p>
+    </footer>
+
+    <!-- Hidden Media Elements -->
+    <video id="video" autoplay playsinline></video>
+    <img id="image" src="" alt="Uploaded Image" style="display: none;">
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <script>
+
+        // Default Settings
+        const defaultAsciiChars = '@%#*+=-:. '; // Default characters for ASCII art mapping
+        let asciiChars = defaultAsciiChars;
+        const charLength = asciiChars.length;
+
+        let toneAdjustment = 0; // Tone adjustment value (-100 to 100)
+        let blurValue = 0; // Blur intensity
+        let contrastValue = 0; // Contrast adjustment (-100 to 100)
+        let seed = Math.random(); // Random seed for character set shuffling
+        let isWebcamActive = false;
+        let isVideo = false; // Track if the current media is a video
+
+        let mediaRecorder = null; // MediaRecorder instance
+        let recordedChunks = []; // Array to store recorded video chunks
+        let isRecordingVideo = false;
+        let frameInterval = null; // Interval for capturing frames
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+
+    // Resolution Slider
+const resolutionSlider = document.getElementById('resolution-slider');
+const resolutionValue = document.getElementById('resolution-value');
+
+// Function to update the resolution display
+function updateResolutionDisplay() {
+    const resolution = resolutionSlider.value;
+    resolutionValue.textContent = `${resolution}x${resolution} px`;
+}
+
+// Initial display
+updateResolutionDisplay();
+
+// Update on slider input
+resolutionSlider.addEventListener('input', function() {
+    updateResolutionDisplay();
+});
+
+    // Reset Button Functionality
+    document.getElementById('reset-button').addEventListener('click', function() {
+        console.log("Reset button clicked!"); // Debugging log
+
+        // Reset sliders
+        document.getElementById('resolution-slider').value = 100;
+        document.getElementById('tone-slider').value = 0;
+        document.getElementById('blur-slider').value = 0;
+        document.getElementById('contrast-slider').value = 0;
+
+        // Reset checkboxes
+        document.getElementById('invert-colors').checked = false;
+        document.getElementById('colorize').checked = false;
+
+        // Reset character style dropdown
+        document.getElementById('char-style').value = 'default';
+
+        // Reset global variables
+        customChars = charStyles.default;
+        currentImage = null;
+        isWebcamActive = false;
+        isVideo = false;
+
+        // Reset theme toggle
+        document.getElementById('theme-toggle').checked = false;
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+        document.getElementById('ascii-art').style.backgroundColor = '#f4f4f4';
+        document.getElementById('ascii-art').style.color = '#000000';
+
+        // Clear ASCII art output
+        const asciiArtContainer = document.getElementById('ascii-art');
+        asciiArtContainer.innerHTML = '';
+
+        // Stop and clear the video element
+        const videoElement = document.getElementById('video');
+        if (videoElement.srcObject) {
+            const stream = videoElement.srcObject;
+            const tracks = stream.getTracks(); // Get all media tracks
+            tracks.forEach(track => track.stop()); // Stop each track
+            videoElement.srcObject = null; // Clear the video source object
+        }
+        videoElement.src = ''; // Clear the video source
+        videoElement.pause(); // Pause the video
+
+        // Clear the image element
+        const imgElement = document.getElementById('image');
+        imgElement.src = ''; // Set the src to an empty string
+        imgElement.onload = null; // Remove any onload handlers
+
+        console.log("All settings reset.");
+    });
+});
+document.getElementById('start-webcam').addEventListener('click', async function() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoElement = document.getElementById('video');
+                videoElement.srcObject = stream;
+                videoElement.onloadedmetadata = function() {
+                    isWebcamActive = true;
+                    isVideo = true;
+                    startAsciiArtAnimation();
+                };
+            } catch (error) {
+                alert('Error accessing webcam.');
+                console.error(error);
+            }
+        });
+
+        document.getElementById('media-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type.startsWith('image/')) {
+                const imgElement = document.getElementById('image');
+                imgElement.src = URL.createObjectURL(file);
+                imgElement.onload = function() {
+                    isWebcamActive = false;
+                    isVideo = false;
+                    updateAsciiArtFromImage(imgElement);
+                };
+            } else if (file.type.startsWith('video/')) {
+                const videoElement = document.getElementById('video');
+                videoElement.src = URL.createObjectURL(file);
+                videoElement.onloadedmetadata = function() {
+                    isWebcamActive = false;
+                    isVideo = true;
+                    startAsciiArtAnimation();
+                };
+            } else {
+                alert('Unsupported file type. Please upload an image or video.');
+            }
+        });
+
+        document.getElementById('resolution-slider').addEventListener('input', function() {
+            if (isVideo) {
+                updateAsciiArtFromVideo();
+            } else {
+                updateAsciiArtFromImage(document.getElementById('image'));
+            }
+        });
+
+        document.getElementById('tone-slider').addEventListener('input', function(event) {
+            toneAdjustment = parseInt(event.target.value, 10);
+            if (isVideo) {
+                updateAsciiArtFromVideo();
+            } else {
+                updateAsciiArtFromImage(document.getElementById('image'));
+            }
+        });
+
+        document.getElementById('blur-slider').addEventListener('input', function(event) {
+            blurValue = parseInt(event.target.value, 10);
+            if (isVideo) {
+                updateAsciiArtFromVideo();
+            } else {
+                updateAsciiArtFromImage(document.getElementById('image'));
+            }
+        });
+
+        document.getElementById('contrast-slider').addEventListener('input', function(event) {
+            contrastValue = parseInt(event.target.value, 10);
+            if (isVideo) {
+                updateAsciiArtFromVideo();
+            } else {
+                updateAsciiArtFromImage(document.getElementById('image'));
+            }
+        });
+
+        document.getElementById('invert-colors').addEventListener('change', function() {
+            if (isVideo) {
+                updateAsciiArtFromVideo();
+            } else {
+                updateAsciiArtFromImage(document.getElementById('image'));
+            }
+        });
+
+        document.getElementById('colorize').addEventListener('change', function() {
+            if (isVideo) {
+                updateAsciiArtFromVideo();
+            } else {
+                updateAsciiArtFromImage(document.getElementById('image'));
+            }
+        });
+
+        document.getElementById('apply-custom-chars').addEventListener('click', function() {
+            const customChars = document.getElementById('custom-chars').value;
+            if (customChars.length > 0) {
+                asciiChars = customChars;
+                if (isVideo) {
+                    updateAsciiArtFromVideo();
+                } else {
+                    updateAsciiArtFromImage(document.getElementById('image'));
+                }
+            } else {
+                alert('Please enter at least one character.');
+            }
+        });
+
+        document.getElementById('randomize-seed').addEventListener('click', function() {
+            seed = Math.random();
+            shuffleAsciiChars();
+            if (isVideo) {
+                updateAsciiArtFromVideo();
+            } else {
+                updateAsciiArtFromImage(document.getElementById('image'));
+            }
+        });
+
+        document.getElementById('save-text').addEventListener('click', function() {
+            const asciiText = document.getElementById('ascii-art').textContent;
+            const blob = new Blob([asciiText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ascii-art.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+// Copy Character Set Buttons
+        document.querySelectorAll('.char-set-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const charSet = this.getAttribute('data-char-set');
+                if (charSet) {
+                    navigator.clipboard.writeText(charSet).then(() => {
+                // Show the message
+                const messageDiv = document.getElementById('copy-message');
+                messageDiv.textContent = `Copied to clipboard: ${charSet}`;
+                messageDiv.style.display = 'block';
+
+                // Hide the message after 1 second
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+
+                // Fallback message if clipboard fails
+                const messageDiv = document.getElementById('copy-message');
+                messageDiv.textContent = 'Failed to copy character set.';
+                messageDiv.style.color = 'red'; // Change color for errors
+                messageDiv.style.display = 'block';
+
+                // Hide the error message after 2 seconds
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                    messageDiv.style.color = 'green'; // Reset color for next message
+                }, 2000);
+            });
+        }
+    });
+});
+
+        document.getElementById('save-image').addEventListener('click', function() {
+    const asciiArtContainer = document.getElementById('ascii-art');
+
+    // Use dom-to-image to capture the container
+    domtoimage.toPng(asciiArtContainer)
+        .then(function(dataUrl) {
+            // Create a download link for the image
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = 'ascii-art.png';
+            link.click();
+        })
+        .catch(function(error) {
+            console.error('Error capturing image:', error);
+        });
+});
+
+        document.getElementById('save-video').addEventListener('click', function() {
+    if (isRecordingVideo) {
+        // Stop recording
+        clearInterval(frameInterval); // Stop capturing frames
+        mediaRecorder.stop();
+        isRecordingVideo = false;
+        document.getElementById('save-video').textContent = 'Save as Video';
+        document.getElementById('save-video').classList.remove('recording');
+    } else {
+        // Start recording
+        startVideoRecording();
+        isRecordingVideo = true;
+        document.getElementById('save-video').textContent = 'Stop Recording';
+        document.getElementById('save-video').classList.add('recording');
+    }
+});
+
+        document.getElementById('theme-toggle').addEventListener('change', function(event) {
+            if (event.target.checked) {
+                document.body.classList.remove('light-theme');
+                document.body.classList.add('dark-theme');
+                document.getElementById('ascii-art').style.backgroundColor = '#1e1e1e';
+                document.getElementById('ascii-art').style.color = '#ffffff';
+            } else {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+                document.getElementById('ascii-art').style.backgroundColor = '#f4f4f4';
+                document.getElementById('ascii-art').style.color = '#000000';
+            }
+        });
+
+document.getElementById('test-frame').addEventListener('click', function() {
+        const asciiArtContainer = document.getElementById('ascii-art');
+        html2canvas(asciiArtContainer).then(canvas => {
+        console.log(canvas); // Log the canvas object
+        document.body.appendChild(canvas); // Append the canvas to the page for visual inspection
+    });
+});
+       // Function to show the spinner
+function showSpinner() {
+    document.getElementById('loading-spinner').style.display = 'flex';
+}
+
+// Function to hide the spinner
+function hideSpinner() {
+    document.getElementById('loading-spinner').style.display = 'none';
+}
+
+// Example: Show spinner during file upload
+document.getElementById('media-input').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    showSpinner(); // Show spinner
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = function() {
+            hideSpinner(); // Hide spinner
+            updateAsciiArt(img); // Generate ASCII art
+        };
+    };
+
+    reader.readAsDataURL(file);
+});
+        // Functions
+        function startAsciiArtAnimation() {
+            setInterval(() => {
+                if (isVideo) {
+                    updateAsciiArtFromVideo();
+                }
+            }, 100); // Update every 100ms
+        }
+
+        function updateAsciiArtFromVideo() {
+            const videoElement = document.getElementById('video');
+            if (!videoElement || videoElement.readyState < 2) return;
+
+            const asciiArt = convertVideoFrameToAscii(videoElement);
+            document.getElementById('ascii-art').innerHTML = asciiArt;
+
+            // Reapply theme styles
+            applyThemeStyles();
+        }
+
+                function updateAsciiArtFromImage(imgElement) {
+            if (!imgElement) return;
+
+            const asciiArt = convertImageToAscii(imgElement);
+            document.getElementById('ascii-art').innerHTML = asciiArt;
+
+            // Reapply theme styles
+            applyThemeStyles();
+        }
+
+        function convertVideoFrameToAscii(video) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Scale down the video frame based on resolution
+            const resolution = parseInt(document.getElementById('resolution-slider').value, 10);
+            const width = resolution;
+            const scale = video.videoWidth / width;
+            const height = Math.floor(video.videoHeight / scale);
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // Draw the scaled video frame onto the canvas
+            ctx.drawImage(video, 0, 0, width, height);
+
+            // Apply blur effect
+            if (blurValue > 0) {
+                ctx.filter = `blur(${blurValue}px)`;
+                ctx.drawImage(canvas, 0, 0, width, height);
+                ctx.filter = 'none'; // Reset filter
+            }
+
+            // Get image data from the canvas
+            const imageData = ctx.getImageData(0, 0, width, height);
+
+            // Apply contrast adjustment
+            if (contrastValue !== 0) {
+                applyContrast(imageData, contrastValue);
+            }
+
+            return convertImageDataToAscii(imageData, width, height);
+        }
+
+        function convertImageToAscii(img) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Scale down the image based on resolution
+            const resolution = parseInt(document.getElementById('resolution-slider').value, 10);
+            const width = resolution;
+            const scale = img.width / width;
+            const height = Math.floor(img.height / scale);
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // Draw the scaled image onto the canvas
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Apply blur effect
+            if (blurValue > 0) {
+                ctx.filter = `blur(${blurValue}px)`;
+                ctx.drawImage(canvas, 0, 0, width, height);
+                ctx.filter = 'none'; // Reset filter
+            }
+
+            // Get image data from the canvas
+            const imageData = ctx.getImageData(0, 0, width, height);
+
+            // Apply contrast adjustment
+            if (contrastValue !== 0) {
+                applyContrast(imageData, contrastValue);
+            }
+
+            return convertImageDataToAscii(imageData, width, height);
+        }
+
+        function convertImageDataToAscii(imageData, width, height) {
+            let ascii = '';
+
+            const isInverted = document.getElementById('invert-colors').checked;
+    const isColorized = document.getElementById('colorize').checked;
+    const removeWhite = document.getElementById('remove-white').checked; // Check if "Remove White/Transparent" is enabled
+
+
+            for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const index = (y * width + x) * 4;
+            const r = imageData.data[index];
+            const g = imageData.data[index + 1];
+            const b = imageData.data[index + 2];
+            const a = imageData.data[index + 3]; // Alpha value (transparency)
+
+            // Check if the pixel is white or transparent
+            const isWhite = r > 240 && g > 240 && b > 240; // Close to white
+            const isTransparent = a < 50; // Very transparent
+
+            if (removeWhite && (isWhite || isTransparent)) {
+                ascii += " "; // Replace with a space (ignore it)
+                continue; // Skip further processing for this pixel
+            }
+
+// Calculate average brightness
+            const avg = (r + g + b) / 3;
+
+                    // Apply tone adjustment
+                    let adjustedAvg = avg + (toneAdjustment * 2.55);
+                    adjustedAvg = Math.max(0, Math.min(255, adjustedAvg));
+
+                    if (isInverted) {
+                        adjustedAvg = 255 - adjustedAvg; // Invert brightness
+                    }
+
+                    const charIndex = Math.floor((adjustedAvg / 255) * (charLength - 1));
+                    const char = asciiChars[charIndex];
+
+                    if (isColorized) {
+                        // Add colorized span
+                        ascii += `<span style="color: rgb(${r}, ${g}, ${b})">${char}</span>`;
+                    } else {
+                        // Plain ASCII character
+                        ascii += char;
+                    }
+                }
+                ascii += '<br>'; // Use <br> for newlines in HTML
+            }
+
+            return ascii;
+        }
+
+        function applyContrast(imageData, contrast) {
+            const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                imageData.data[i] = truncateColor(factor * (imageData.data[i] - 128) + 128); // Red
+                imageData.data[i + 1] = truncateColor(factor * (imageData.data[i + 1] - 128) + 128); // Green
+                imageData.data[i + 2] = truncateColor(factor * (imageData.data[i + 2] - 128) + 128); // Blue
+            }
+        }
+
+        function truncateColor(value) {
+            return Math.max(0, Math.min(255, value));
+        }
+
+        function shuffleAsciiChars() {
+            const charsArray = asciiChars.split('');
+            for (let i = charsArray.length - 1; i > 0; i--) {
+                const j = Math.floor(seed * (i + 1)); // Use seed for pseudo-randomness
+                [charsArray[i], charsArray[j]] = [charsArray[j], charsArray[i]];
+            }
+            asciiChars = charsArray.join('');
+        }
+
+        function startVideoRecording() {
+    recordedChunks = []; // Reset recorded chunks
+
+    // Create a canvas to capture ASCII art frames
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas dimensions based on ASCII art container
+    const asciiArtContainer = document.getElementById('ascii-art');
+    canvas.width = asciiArtContainer.clientWidth;
+    canvas.height = asciiArtContainer.clientHeight;
+
+    // Start capturing frames
+    frameInterval = setInterval(() => {
+        domtoimage.toPng(asciiArtContainer) // Use dom-to-image to capture the frame
+            .then(dataUrl => {
+                const img = new Image();
+                img.src = dataUrl; // Convert data URL to an image
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous frame
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Draw new frame
+                };
+            })
+            .catch(error => {
+                console.error('Error capturing frame:', error);
+            });
+    }, 100); // Capture every 100ms (10 FPS)
+
+    // Initialize MediaRecorder
+    const stream = canvas.captureStream(10); // 10 FPS
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+
+    // Collect video chunks
+    mediaRecorder.ondataavailable = function(event) {
+        if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+        }
+    };
+
+    // Save video when recording stops
+    mediaRecorder.onstop = function() {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ascii-art.webm';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    mediaRecorder.start(); // Start recording
+}
+
+        function applyThemeStyles() {
+            const isDarkTheme = document.body.classList.contains('dark-theme');
+            if (isDarkTheme) {
+                document.getElementById('ascii-art').style.backgroundColor = '#1e1e1e';
+                document.getElementById('ascii-art').style.color = '#ffffff';
+            } else {
+                document.getElementById('ascii-art').style.backgroundColor = '#f4f4f4';
+                document.getElementById('ascii-art').style.color = '#000000';
+            }
+        }
+        // Update ASCII art when the algorithm type changes
+document.getElementById('algorithm-type').addEventListener('change', function() {
+    updateAsciiArt(document.querySelector('img') || document.querySelector('video'));
+
+
+});
+    </script>
+</body>
+</html>
