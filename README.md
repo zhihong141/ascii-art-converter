@@ -12,7 +12,7 @@ A web-based tool to convert images into ASCII art with customizable options like
 
 ## How to Run Locally
 1. Clone this repository.
-2. Open `index.html` in your browser.
+2. Open `AsciiArtConverter_V2.html` in your browser.
 
 ## Credits
 Created by Seven.Four.
