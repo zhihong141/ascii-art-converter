@@ -16,3 +16,4 @@ A web-based tool to convert images into ASCII art with customizable options like
 
 ## Credits
 Created by Seven.Four.
+[Visual Diary] (https://linktr.ee/seven.four/)
